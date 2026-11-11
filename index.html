@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+{% block title %}CityCare Hospital | Doctor Appointment Scheduler{% endblock %}
+{% block body %}
+{% include "partials/public_nav.html" %}
+
+<section class="hero" id="home">
+  <div class="hero-orb hero-orb-one"></div>
+  <div class="hero-orb hero-orb-two"></div>
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow"><span class="pulse-dot"></span> Trusted multi-specialty care in Visakhapatnam</span>
+      <h1>Your health, <span>our priority.</span><br>Book a doctor in minutes.</h1>
+      <p>Find the right specialist, check real-time availability and confirm your appointment online. No queues, no confusion - just care when you need it.</p>
+
+      <form class="doctor-search" id="homeSearchForm">
+        <div class="search-field">
+          <svg class="icon"><use href="#i-search"></use></svg>
+          <input type="text" id="homeSearchInput" placeholder="Search by doctor name or specialization" autocomplete="off">
+        </div>
+        <select id="homeSpecialization" aria-label="Specialization">
+          <option value="">All specializations</option>
+          {% for item in specializations %}
+            <option value="{{ item.specialization }}">{{ item.specialization }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+
+      <div class="hero-stats">
+        <div><strong>{{ stats.doctors }}+</strong><span>Expert doctors</span></div>
+        <div><strong>{{ stats.specializations }}</strong><span>Specialities</span></div>
+        <div><strong>{{ stats.patients }}+</strong><span>Happy patients</span></div>
+        <div><strong>24/7</strong><span>Emergency care</span></div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-card main">
+        <div class="hero-card-head">
+          <span class="mini-avatar"><svg class="icon"><use href="#i-stethoscope"></use></svg></span>
+          <div>
+            <strong>Book with confidence</strong>
+            <small>Live doctor availability</small>
+          </div>
+        </div>
+        <div class="fake-slot active"><span>10:30 AM</span><em>Available</em></div>
+        <div class="fake-slot"><span>11:00 AM</span><em>Booked</em></div>
+        <div class="fake-slot"><span>11:30 AM</span><em>Available</em></div>
+        <div class="hero-card-foot">
+          <span><svg class="icon"><use href="#i-shield"></use></svg> Verified doctors</span>
+          <span><svg class="icon"><use href="#i-bolt"></use></svg> Instant confirmation</span>
+        </div>
+      </div>
+      <div class="floating-card top">
+        <span class="stat-icon green"><svg class="icon"><use href="#i-check"></use></svg></span>
+        <div><strong>Appointment confirmed</strong><small>Token #12 &middot; Today, 10:30 AM</small></div>
+      </div>
+      <div class="floating-card bottom">
+        <span class="stat-icon blue"><svg class="icon"><use href="#i-calendar"></use></svg></span>
+        <div><strong>{{ stats.appointments }}+ bookings</strong><small>Managed securely</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="trust-strip">
+  <div class="container trust-grid">
+    <div><svg class="icon"><use href="#i-shield"></use></svg><span><strong>NABH accredited</strong><small>Quality healthcare standards</small></span></div>
+    <div><svg class="icon"><use href="#i-heart"></use></svg><span><strong>Compassionate care</strong><small>Patient-first approach</small></span></div>
+    <div><svg class="icon"><use href="#i-activity"></use></svg><span><strong>Modern equipment</strong><small>Accurate diagnosis &amp; care</small></span></div>
+    <div><svg class="icon"><use href="#i-clock"></use></svg><span><strong>24 x 7 emergency</strong><small>Always here for you</small></span></div>
+  </div>
+</section>
+
+<section class="section" id="departments">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Our specialities</span>
+      <h2>Complete care under one roof</h2>
+      <p>From routine check-ups to specialist consultations, our departments are staffed by experienced doctors.</p>
+    </div>
+    <div class="department-grid">
+      {% set dept_icons = ['i-heart', 'i-activity', 'i-shield', 'i-user', 'i-stethoscope', 'i-users', 'i-pill', 'i-building'] %}
+      {% for item in specializations %}
+        <div class="department-card">
+          <span class="dept-icon"><svg class="icon"><use href="#{{ dept_icons[loop.index0 % 8] }}"></use></svg></span>
+          <h3>{{ item.specialization }}</h3>
+          <p>{{ item.doctor_count }} experienced doctor{{ '' if item.doctor_count == 1 else 's' }} available for consultation.</p>
+          <a href="#doctors" class="text-link" data-dept-filter="{{ item.specialization }}">View doctors <svg class="icon"><use href="#i-arrow"></use></svg></a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section section-tinted" id="doctors">
+  <div class="container">
+    <div class="section-head split">
+      <div>
+        <span class="eyebrow">Meet our specialists</span>
+        <h2>Find a doctor who understands you</h2>
+        <p>Browse verified specialists and book the next available slot.</p>
+      </div>
+      <span class="result-pill" id="doctorCount">{{ doctors|length }} doctors shown</span>
+    </div>
+
+    <div class="doctor-grid" id="doctorGrid" data-user-role="{{ user.role if user else '' }}">
+      {% for doctor in doctors %}
+        <article class="doctor-card">
+          <div class="doctor-card-top">
+            <span class="avatar avatar-lg" data-initials="{{ doctor.name[3:5]|upper if doctor.name.startswith('Dr.') else doctor.name[0:2]|upper }}"></span>
+            <div>
+              <h3>{{ doctor.name }}</h3>
+              <span class="specialty">{{ doctor.specialization }}</span>
+            </div>
+          </div>
+          <p class="doctor-meta"><svg class="icon"><use href="#i-file"></use></svg> {{ doctor.qualification }}</p>
+          <p class="doctor-meta"><svg class="icon"><use href="#i-shield"></use></svg> {{ doctor.experience_years }} years experience</p>
+          <p class="doctor-bio">{{ doctor.bio[:110] }}{% if doctor.bio|length > 110 %}...{% endif %}</p>
+          <div class="doctor-card-foot">
+            <div>
+              <span class="fee">&#8377;{{ doctor.consultation_fee|int }}</span>
+              <small>consultation fee</small>
+            </div>
+            {% if not user or user.role == 'patient' %}
+              {% if doctor.next_available %}
+                <a class="btn btn-primary btn-sm" href="{{ url_for('patient_book', doctor_id=doctor.doctor_id) if user else url_for('login_page', next=url_for('patient_book', doctor_id=doctor.doctor_id)) }}">Book now</a>
+              {% else %}
+                <span class="badge badge-muted">No slots</span>
+              {% endif %}
+            {% else %}
+              <span class="next-slot">{{ doctor.next_available.date if doctor.next_available else 'Check schedule' }}</span>
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+    <div class="empty-state" id="doctorEmpty" hidden>
+      <span class="empty-icon"><svg class="icon"><use href="#i-search"></use></svg></span>
+      <h3>No doctors match your search</h3>
+      <p>Try a different name or specialization.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="about">
+  <div class="container about-grid">
+    <div class="about-visual">
+      <div class="about-panel">
+        <div class="about-panel-head">
+          <span class="mini-avatar"><svg class="icon"><use href="#i-building"></use></svg></span>
+          <div><strong>{{ hospital_name }}</strong><small>Established with a vision to make care accessible.</small></div>
+        </div>
+        <div class="about-metrics">
+          <div><strong>25+</strong><span>Years of care</span></div>
+          <div><strong>40+</strong><span>Specialists</span></div>
+          <div><strong>500+</strong><span>Patients served</span></div>
+          <div><strong>24/7</strong><span>Emergency</span></div>
+        </div>
+      </div>
+      <div class="about-badge"><svg class="icon"><use href="#i-shield"></use></svg> NABH<br>Accredited</div>
+    </div>
+    <div class="about-copy">
+      <span class="eyebrow">About CityCare</span>
+      <h2>Healthcare that revolves around you</h2>
+      <p>CityCare Multi-Specialty Hospital brings together experienced doctors, modern diagnostics and a caring support team. Our appointment scheduler makes it easy to find the right specialist and reserve a time that works for you.</p>
+      <ul class="check-list">
+        <li><svg class="icon"><use href="#i-check"></use></svg> Real-time doctor availability with no double booking</li>
+        <li><svg class="icon"><use href="#i-check"></use></svg> Digital appointment tokens and confirmation</li>
+        <li><svg class="icon"><use href="#i-check"></use></svg> Secure patient records and e-prescriptions</li>
+        <li><svg class="icon"><use href="#i-check"></use></svg> Reception support for phone and walk-in bookings</li>
+      </ul>
+      <a href="#doctors" class="btn btn-primary">Book an appointment <svg class="icon"><use href="#i-arrow"></use></svg></a>
+    </div>
+  </div>
+</section>
+
+<section class="section section-tinted" id="how-it-works">
+  <div class="container">
+    <div class="section-head center">
+      <span class="eyebrow">Simple and transparent</span>
+      <h2>Book your appointment in 3 steps</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <span class="step-number">01</span>
+        <span class="step-icon"><svg class="icon"><use href="#i-search"></use></svg></span>
+        <h3>Find your doctor</h3>
+        <p>Search by doctor name or specialization and compare experience, fees and availability.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-number">02</span>
+        <span class="step-icon"><svg class="icon"><use href="#i-clock"></use></svg></span>
+        <h3>Pick a time slot</h3>
+        <p>Choose from live available slots. The system instantly checks the doctor's schedule.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-number">03</span>
+        <span class="step-icon"><svg class="icon"><use href="#i-check"></use></svg></span>
+        <h3>Confirm and visit</h3>
+        <p>Receive your appointment ID and token number. Show it at the reception on your visit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container cta-band">
+    <div>
+      <span class="eyebrow light">New patient?</span>
+      <h2>Create your account and book your first appointment today.</h2>
+    </div>
+    <div class="cta-actions">
+      <a href="{{ url_for('register_page') }}" class="btn btn-white">Register as Patient</a>
+      <a href="{{ url_for('login_page') }}" class="btn btn-outline-light">Already registered? Log in</a>
+    </div>
+  </div>
+</section>
+
+{% include "partials/footer.html" %}
+{% endblock %}
+
+{% block page_script %}
+<script src="{{ url_for('static', filename='js/public.js') }}"></script>
+{% endblock %}

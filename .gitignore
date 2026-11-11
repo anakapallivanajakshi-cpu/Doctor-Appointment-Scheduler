@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Generated data
+hospital.db
+
+# Vercel
+.vercel/
+
+# Environment
+.env
+
+.vercel
